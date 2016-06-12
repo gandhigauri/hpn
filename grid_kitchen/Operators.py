@@ -1,45 +1,51 @@
 from Fluents import Fluents
 from GridEnv import GridEnv
+from States import States
+
 import random
 
 class Operators(object):
 	"""docstring for Operators"""
 	def __init__(self):
-		self.grid_env = GridEnv([15], 3, {'C1': 2, 'C2': 1, 'C3': 4}, {'C1': False, 'C2': False, 'C3': False}, {'C1': False, 'C2': False, 'C3': False}, [5,2], [8,2], [11,4])
-		self.fluents = Fluents(self.grid_env)
+		self.state_now = States()
+		self.grid_env = GridEnv([15], 3, self.state_now.obj_locs, self.state_now.obj_clean_state, self.state_now.obj_cook_state, [5,2], [8,2], [11,4])
+		self.fluents = Fluents(self.state_now)
+		self.goal_now = Goals()
 		#self.Wash('C1')
 		#self.grid_env.item_locs['C1']=8
 		#self.Cook('C1')
 		#self.sweptVol('C1',3,11)
-		#self.PickPlace('C1',5)
+		#self.PickPlace('C3',5)
 		#self.In('C1',[1,2])
 		#self.Clear(range(4,11),['C3'])
+		#self.GenerateLocsInRegion('C1',[7,8])
 
 	def Wash(self, obj):
 		if (self.fluents.In(obj, self.grid_env.sink_locs)):
-			self.grid_env.clean_states[obj] = True
+			self.state_now.obj_clean_state[obj] = True
 			print obj + " washed"
 		else:
 			print obj + " not washed"
 
 	def Cook(self, obj):
 		if (self.fluents.In(obj, self.grid_env.stove_locs)) and (self.fluents.Clean(obj)):
-			self.grid_env.cook_states[obj] = True
+			self.state_now.obj_cook_state[obj] = True
 			print obj + " cooked"
 		else:
 			print obj + " not cooked"
 
 	def PickPlace(self, obj, target_loc):
 		#choose start_loc
-		obj_loc = [self.grid_env.item_locs[obj]]
+		obj_loc = [self.state_now.obj_locs[obj]]
 		#start_loc = random.choice(list(set(obj_loc).union(self.GenerateLocsInRegion(obj,reg))))
 		start_loc = obj_loc[0]
 		#preconditions
 		if (self.fluents.ObjLoc(obj,start_loc)) and self.fluents.ClearX(self.sweptVol(obj,start_loc,target_loc),[obj]):
-			self.grid_env.item_locs[obj] = target_loc
+			self.state_now.obj_locs[obj] = target_loc
 			print obj + " placed at " + str(target_loc)
 		else:
 			print obj + " not placed at " + str(target_loc)
+		self.grid_env.create_grid()
 
 	def sweptVol(self, obj, start_loc, target_loc):
 	 	sweep = range(min(start_loc,target_loc), max(start_loc,target_loc)+1)
@@ -47,7 +53,23 @@ class Operators(object):
 	 	return sweep
 
 	def GenerateLocsInRegion(self, obj, reg):
-		pass
+		#defining set C for present goal
+		C = []
+		x = []
+		for ex in (self.state_now.obj_locs.keys()):
+			if ex not in ([obj]):
+				x.append(ex)
+		for r in range(0,self.grid_env.grid_length):
+			if (self.fluents.ClearX([r],x)):
+				C.append(r)
+		print "Set C is " + str(C)
+		# TODO
+		#defing set O for the other objects to be placed in the present goal
+		O = []
+		#defing set R
+		R = list(set(reg)-(set(C).union(O)))
+		print R
+		return R
 
 	def In(self, obj, reg):
 		#choose
@@ -62,7 +84,7 @@ class Operators(object):
 
 	def Clear(self, reg, exceptions):
 		check = 1
-		for obj in (self.grid_env.item_locs.keys()):
+		for obj in (self.state_now.obj_locs.keys()):
 			if obj not in (exceptions):
 				if not (self.fluents.In(obj,list(set(range(0,self.grid_env.grid_length))-set(reg)))):
 					check = 0
