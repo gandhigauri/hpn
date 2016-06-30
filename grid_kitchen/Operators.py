@@ -1,16 +1,19 @@
 from Fluents import Fluents
-from GridEnv import GridEnv
-from States import States
+#from GridEnv import GridEnv
+#from States import States
+#from Goals import Goals
 
 import random
 
 class Operators(object):
 	"""docstring for Operators"""
-	def __init__(self):
-		self.state_now = States()
-		self.grid_env = GridEnv([15], 3, self.state_now.obj_locs, self.state_now.obj_clean_state, self.state_now.obj_cook_state, [5,2], [8,2], [11,4])
+	def __init__(self, grid, state, goal):
+		self.state_now = state
+		self.grid_env = grid
 		self.fluents = Fluents(self.state_now)
-		self.goal_now = Goals()
+		self.goal_now = goal
+		#self.is_prim = {'W': True, 'C': True, 'P': True, 'I': False, 'X': False}
+		#self.execute = {'W': Wash, 'C': Cook, 'P': PickPlace}
 		#self.Wash('C1')
 		#self.grid_env.item_locs['C1']=8
 		#self.Cook('C1')
@@ -60,7 +63,7 @@ class Operators(object):
 			if ex not in ([obj]):
 				x.append(ex)
 		for r in range(0,self.grid_env.grid_length):
-			if (self.fluents.ClearX([r],x)):
+			if (self.fluents.ClearX([r],x) and (self.goal_now.goal_list[-1]):
 				C.append(r)
 		print "Set C is " + str(C)
 		# TODO
@@ -95,7 +98,7 @@ class Operators(object):
 			print "ClearX fluent is " + str(self.fluents.ClearX(reg,exceptions))			
 			print "region " + str(reg) + " is not clear of all objects except " + str(exceptions)
 		
-
+'''
 if __name__ == '__main__':
 	operators = Operators()
-
+'''
