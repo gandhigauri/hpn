@@ -1,6 +1,6 @@
 from GridEnv import GridEnv
 from States import States
-from Operators import Operators
+from Operator_Instances import Operator_Instances
 from Goals import Goals
 
 class Planner(object):
@@ -9,14 +9,15 @@ class Planner(object):
 		self.state_now = States()
 		self.grid_env = GridEnv([15], 3, self.state_now.obj_locs, self.state_now.obj_clean_state, self.state_now.obj_cook_state, [5,2], [8,2], [11,4])
 		self.goals = Goals()
-		self.operators = Operators(self.grid_env, self.state_now, self.goals)
+		self.operators = Operator_Instances(self.grid_env, self.state_now, self.goals)
 		self.HPN(self.goals.goal_list[0], alpha)
+		
 		
 	def HPN(self, start_goal, alpha):
 		p = self.plan(start_goal, alpha)
 		for [w,g] in p:
 			if is_prim(w):
-				self.operators.execute[w]()
+				self.execute(w)
 			else:
 				self.HPN(g, next_level(alpha,w))
 
@@ -27,4 +28,7 @@ class Planner(object):
 		ops = []
 		for f in goal:
 			for O in 
+
+
+	def e
 
