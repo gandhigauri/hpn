@@ -10,43 +10,64 @@ class Operator_Instances(object):
 		self.fluents = Fluents(self.state_now)
 		self.goals = goal
 		self.actions = Actions(self.state_now)
-		#self.args = []
-		self.effect = []
-		self.pre = []
+	
+		self.effect = {}
+		self.pre = {}
 		self.prim = []
 		self.choose = {}
 
+	
 		"""defining operator instances"""
 
-	def Wash(self, args):
-		self.effect = [self.fluents.Clean(args['obj'])]
-		self.pre = [self.fluents.In(args['obj'],self.grid_env.sink_locs)]
+		#self.Wash = {'args': {'obj':None, 'reg':self.grid_env.sink_locs, 'loc':None}, 'effect' : [self.fluents.Clean], 'pre' : [self.fluents.In], 'choose' : None}
+        self.Wash = {'effect':{'fluents':[self.fluents.Clean], 'args':[{'obj':None, 'reg':None, 'loc':None}]}, 'pre':{'fluents':[self.fluents.In], 'args': [{'obj':None, 'reg':self.grid_env.sink_locs, 'loc':None}]}}
+	    self.OperatorDescriptions = [self.Wash]
+	'''def Wash(self, args):
+		#self.effect = [self.fluents.Clean(args['obj'])]
+		#self.pre = [self.fluents.In(args['obj'],self.grid_env.sink_locs)]
+		self.effect = {'effect':[self.fluents.Clean], 'args':[args['obj']]}
+		self.pre = {'pre':[self.fluents.In], 'args':[args['obj'], self.grid_env.sink_locs]}
 		self.prim = [self.actions.Wash]
-
+'''
 	def Cook(self, args):
-		self.effect = [self.fluents.Cooked(args['obj'])]
-		self.pre = [self.fluents.In(args['obj'],self.grid_env.stove_locs), self.fluents.Clean(args['obj'])]
+		#self.effect = [self.fluents.Cooked(args['obj'])]
+		#self.pre = [self.fluents.In(args['obj'],self.grid_env.stove_locs), self.fluents.Clean(args['obj'])]
+		self.effect = [self.fluents.Cooked]
+		self.pre = [self.fluents.In, self.fluents.Clean]
 		self.prim = [self.actions.Cook]
 
 	def PickPlace(self, args):
-		self.effect = [self.fluents.ObjLoc(args['obj'], args['loc'])]
+		#self.effect = [self.fluents.ObjLoc(args['obj'], args['loc'])]
+		#TODO start loc should be generated from generate locs in regions
+		#start_locs = self.state_now.obj_locs[args['obj']]
+		#self.choose = {'start_loc':random.choice(start_locs)}
+		#self.pre = [self.fluents.ObjLoc(args['obj'], self.choose['start_loc']), self.fluents.ClearX(self.sweptVol(args['obj'],self.choose['start_loc'],args['loc']),[args['obj']])]
+		self.effect = [self.fluents.ObjLoc]
 		#TODO start loc should be generated from generate locs in regions
 		start_locs = self.state_now.obj_locs[args['obj']]
 		self.choose = {'start_loc':random.choice(start_locs)}
-		self.pre = [self.fluents.ObjLoc(args['obj'], self.choose['start_loc']), self.fluents.ClearX(self.sweptVol(args['obj'],self.choose['start_loc'],args['loc']),[args['obj']])]
+		self.pre = [self.fluents.ObjLoc, self.fluents.ClearX]
 		self.prim = [self.actions.PickPlace]
 
 	def In(self, args):
-		self.effect = [self.fluents.In(args['obj'], args['reg'])]
+		#self.effect = [self.fluents.In(args['obj'], args['reg'])]
+		#locs = self.GenerateLocsInRegion(args)
+		#self.choose = {'loc':random.choice(locs)}
+		#self.pre = [self.fluents.ObjLoc(args['obj'], self.choose['loc'])]
+		self.effect = [self.fluents.In]
 		locs = self.GenerateLocsInRegion(args)
 		self.choose = {'loc':random.choice(locs)}
-		self.pre = [self.fluents.ObjLoc(args['obj'], self.choose['loc'])]
+		self.pre = [self.fluents.ObjLoc]
 
 	def Clear(self, args):
-		self.effect = [self.fluents.ClearX(args['reg'], args['exceptions'])]
+		#self.effect = [self.fluents.ClearX(args['reg'], args['exceptions'])]
+		#for obj in (self.state_now.obj_locs.keys()):
+			#if obj not in (args['exceptions']):
+				#self.pre = [self.fluents.In(obj, list(set(range(0,self.grid_env.grid_length))-set(args['reg'])))]
+		self.effect = [self.fluents.ClearX]
 		for obj in (self.state_now.obj_locs.keys()):
 			if obj not in (args['exceptions']):
-				self.pre = [self.fluents.In(obj, list(set(range(0,self.grid_env.grid_length))-set(args['reg'])))]
+				self.pre = [self.fluents.In]
 
 	def sweptVol(self, obj, start_loc, target_loc):
 	 	sweep = range(min(start_loc,target_loc), max(start_loc,target_loc)+1)
@@ -70,13 +91,16 @@ class Operator_Instances(object):
 		for l in range(0,self.grid_env.grid_length):
 			if (self.fluents.ObjLoc([l],x) and (self.goals.goal_list[-1]):
 				O.append(r)
-
+,
 		#defing set R
 		R = list(set(args['reg'])-(set(C).union(O)))
 		print R
 		return R
 
-	
+	def Execute(self, oper, args):
+		self.oper(args)
+		self.prim[0](args)
+
 
 
 		
