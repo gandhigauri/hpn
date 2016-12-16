@@ -1,6 +1,6 @@
 from GridEnv import GridEnv
 from States import States
-from Operator_Instances import Operator_Instances
+from Operators import Operators
 from Goals import Goals
 import copy
 
@@ -10,9 +10,12 @@ class Planner(object):
 		self.state_now = States()
 		self.grid_env = GridEnv([15], 3, self.state_now.obj_locs, self.state_now.obj_clean_state, self.state_now.obj_cook_state, [5,2], [8,2], [11,4])
 		self.goals = Goals()
-		self.operators = Operator_Instances(self.grid_env, self.state_now, self.goals)
-		selef.HPN(self.goals.goal_list[0], alpha)
-		
+		#self.operators = Operators(self.grid_env, self.state_now, self.goals)
+		self.OperatorNames = Operators.__subclassess__()
+	self.OperatorDescriptions = []
+		for n in self.OperatorNames:
+			self.OperatorDescriptions.append(n(self.grid_env, self.state_now, self.goals))
+		self.HPN(self.goals.goal_list[0], alpha)
 		
 	def HPN(self, goal, alpha):
 		p = self.plan(goal, alpha)

@@ -10,25 +10,45 @@ class Operator_Instances(object):
 		self.fluents = Fluents(self.state_now)
 		self.goals = goal
 		self.actions = Actions(self.state_now)
-	
+
 		self.effect = {}
 		self.pre = {}
-		self.prim = []
-		self.choose = {}
+		self.cost = None
+		self.prim = None
+		self.choose = None
 
-	
+		self.OperatorDescriptions = []
+
 		"""defining operator instances"""
 
-		#self.Wash = {'args': {'obj':None, 'reg':self.grid_env.sink_locs, 'loc':None}, 'effect' : [self.fluents.Clean], 'pre' : [self.fluents.In], 'choose' : None}
-        self.Wash = {'effect':{'fluents':[self.fluents.Clean], 'args':[{'obj':None, 'reg':None, 'loc':None}]}, 'pre':{'fluents':[self.fluents.In], 'args': [{'obj':None, 'reg':self.grid_env.sink_locs, 'loc':None}]}}
+		
+        self.Wash = {'effect':{'fluents':[self.fluents.Clean], 'args':[{'obj':None, 'reg':None, 'loc':None}]}, \
+        			'pre':{'fluents':[self.fluents.In], 'args': [{'obj':None, 'reg':self.grid_env.sink_locs, 'loc':None}]}, \
+        			'cost':1 \
+        			'prim':self.actions.Wash \
+        			'choose':None}
+
+	    self.Cook = {'effect':{'fluents':[self.fluents.Cooked], 'args':[{'obj':None, 'reg':None, 'loc':None}]}, \
+        			'pre':{'fluents':[self.fluents.In, self.fluents.Clean], 'args': [{'obj':None, 'reg':self.grid_env.stove_locs, 'loc':None}, {'obj':None, 'reg':None, 'loc':None}]}, \
+        			'cost':1 \
+        			'prim':self.actions.Cook \
+        			'choose':None}
+
+        self.PickPlace = {'effect':{'fluents':[self.fluents.ObjLoc], 'args':[{'obj':None, 'reg':None, 'loc':None}]}, \
+        			'pre':{'fluents':[self.fluents.ObjLoc, self.fluents.ClearX], 'args': [{'obj':None, 'reg':None, 'loc':None}, {'obj':None, 'reg':None, 'loc':None}]}, \
+        			'cost':1 \
+        			'prim':self.actions.Wash}
+
+        self.In = {'effect':{'fluents':[self.fluents.Clean], 'args':[{'obj':None, 'reg':None, 'loc':None}]}, \
+        			'pre':{'fluents':[self.fluents.In], 'args': [{'obj':None, 'reg':self.grid_env.sink_locs, 'loc':None}]}, \
+        			'cost':1 \
+        			'prim':self.actions.Wash}
+        self.Clear = {'effect':{'fluents':[self.fluents.Clean], 'args':[{'obj':None, 'reg':None, 'loc':None}]}, \
+        			'pre':{'fluents':[self.fluents.In], 'args': [{'obj':None, 'reg':self.grid_env.sink_locs, 'loc':None}]}, \
+        			'cost':1 \
+        			'prim':self.actions.Wash}
 	    self.OperatorDescriptions = [self.Wash]
-	'''def Wash(self, args):
-		#self.effect = [self.fluents.Clean(args['obj'])]
-		#self.pre = [self.fluents.In(args['obj'],self.grid_env.sink_locs)]
-		self.effect = {'effect':[self.fluents.Clean], 'args':[args['obj']]}
-		self.pre = {'pre':[self.fluents.In], 'args':[args['obj'], self.grid_env.sink_locs]}
-		self.prim = [self.actions.Wash]
-'''
+	
 	def Cook(self, args):
 		#self.effect = [self.fluents.Cooked(args['obj'])]
 		#self.pre = [self.fluents.In(args['obj'],self.grid_env.stove_locs), self.fluents.Clean(args['obj'])]
@@ -71,7 +91,7 @@ class Operator_Instances(object):
 
 	def sweptVol(self, obj, start_loc, target_loc):
 	 	sweep = range(min(start_loc,target_loc), max(start_loc,target_loc)+1)
-	 	print "sweptVol is " + str(sweep)
+	 	#print "sweptVol is " + str(sweep)
 	 	return sweep
 
 	def GenerateLocsInRegion(self, args):
